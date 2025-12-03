@@ -1,0 +1,22 @@
+{
+  "name": "MERN Azure App",
+  "description": "A full-stack MERN application deployed on Microsoft Azure",
+  "keywords": [
+    "MERN",
+    "MongoDB",
+    "Express",
+    "React",
+    "Node.js",
+    "Azure"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mern-app.git"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  }
+}

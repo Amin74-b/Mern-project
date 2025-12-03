@@ -1,0 +1,69 @@
+name: Build and Deploy to Azure Web App
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js version
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        cd server && npm install && cd ..
+        cd client && npm install && cd ..
+
+    - name: Build React application
+      run: |
+        cd client
+        npm run build
+        cd ..
+
+    - name: Run tests (if available)
+      run: |
+        npm test --passWithNoTests
+      continue-on-error: true
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          client/build
+          server
+          package.json
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+        package: .
+
+    - name: Deployment successful
+      run: |
+        echo "✅ Successfully deployed to Azure!"
+        echo "🌐 Access your app at: https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
